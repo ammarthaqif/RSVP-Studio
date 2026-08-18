@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, Heart, Share2, Users, FileEdit, Eye, 
   Download, Plus, RefreshCw, Mail, Calendar, 
-  MapPin, Check, QrCode, Sliders, Smartphone, Laptop, Layout
+  MapPin, Check, QrCode, Sliders, Smartphone, Laptop, Layout,
+  ZoomIn, ZoomOut, RotateCcw, ArrowLeft
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { EventInvitation, RSVPResponse, GuestbookEntry } from './types';
@@ -40,6 +41,9 @@ export default function App() {
   });
   const [activeMode, setActiveMode] = useState<AppMode>('editor');
 
+  // Preview zoom scale state (50% - 125%)
+  const [previewZoom, setPreviewZoom] = useState<number>(100);
+
   // Persist events to localStorage on change
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -56,7 +60,6 @@ export default function App() {
 
   // Interactive envelope modal experience
   const [isEnvelopeOpen, setIsEnvelopeOpen] = useState(false);
-  const [envelopeOpenedState, setEnvelopeOpenedState] = useState(false);
 
   // RSVP Submission modal
   const [isRSVPModalOpen, setIsRSVPModalOpen] = useState(false);
@@ -85,7 +88,6 @@ export default function App() {
         if (found) {
           setActiveEventId(found.id);
           setActiveMode('guest-card');
-          setIsEnvelopeOpen(true);
         }
       }
     }
@@ -160,22 +162,10 @@ export default function App() {
     setEvents(prev => prev.map(e => e.id === activeEvent.id ? { ...e, guestbook: updated } : e));
   };
 
-  // Create new blank / preset event
-  const handleCreateNewEvent = (templateType: 'wedding' | 'birthday' | 'gala') => {
-    const basePreset = PRESET_TEMPLATES.find(e => e.eventType === templateType) || PRESET_TEMPLATES[0];
-    const newEvent: EventInvitation = {
-      ...basePreset,
-      id: `event-${Date.now()}`,
-      slug: `my-${templateType}-${Date.now().toString().slice(-4)}`,
-      title: templateType === 'wedding' ? 'Our Wedding Celebration' : templateType === 'birthday' ? 'Birthday Soirée' : 'Annual Charity Gala',
-      hosts: templateType === 'wedding' ? 'Emma & Lucas' : 'The Host Committee',
-      rsvps: [],
-      guestbook: [],
-    };
-    setEvents([newEvent, ...events]);
-    setActiveEventId(newEvent.id);
-    setActiveMode('editor');
-  };
+  // Zoom handlers
+  const handleZoomIn = () => setPreviewZoom(prev => Math.min(125, prev + 10));
+  const handleZoomOut = () => setPreviewZoom(prev => Math.max(50, prev - 10));
+  const handleZoomReset = () => setPreviewZoom(100);
 
   return (
     <div className="min-h-screen bg-[#F8F9FA] text-slate-800 flex flex-col font-sans selection:bg-indigo-500 selection:text-white relative">
@@ -215,7 +205,7 @@ export default function App() {
                 id="event-selector-dropdown"
                 value={activeEventId}
                 onChange={(e) => setActiveEventId(e.target.value)}
-                className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-white text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 max-w-[150px] sm:max-w-[210px] truncate transition-all"
+                className="px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-white text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 max-w-[150px] sm:max-w-[210px] truncate transition-all cursor-pointer"
               >
                 {events.map((ev) => (
                   <option key={ev.id} value={ev.id}>
@@ -231,7 +221,7 @@ export default function App() {
             <button
               id="mode-editor-btn"
               onClick={() => setActiveMode('editor')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeMode === 'editor'
                   ? 'bg-white text-slate-900 shadow-sm font-semibold'
                   : 'text-slate-500 hover:text-slate-900'
@@ -244,7 +234,7 @@ export default function App() {
             <button
               id="mode-guest-view-btn"
               onClick={() => setActiveMode('guest-card')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeMode === 'guest-card'
                   ? 'bg-white text-slate-900 shadow-sm font-semibold'
                   : 'text-slate-500 hover:text-slate-900'
@@ -257,7 +247,7 @@ export default function App() {
             <button
               id="mode-rsvp-tracker-btn"
               onClick={() => setActiveMode('rsvp-tracker')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeMode === 'rsvp-tracker'
                   ? 'bg-white text-slate-900 shadow-sm font-semibold'
                   : 'text-slate-500 hover:text-slate-900'
@@ -273,7 +263,7 @@ export default function App() {
             <button
               id="mode-share-export-btn"
               onClick={() => setActiveMode('share-export')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
                 activeMode === 'share-export'
                   ? 'bg-white text-slate-900 shadow-sm font-semibold'
                   : 'text-slate-500 hover:text-slate-900'
@@ -289,7 +279,7 @@ export default function App() {
             <button
               id="open-envelope-sim-btn"
               onClick={() => setIsEnvelopeOpen(true)}
-              className="px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 transition-all flex items-center gap-1.5 shadow-2xs"
+              className="px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg hover:bg-slate-50 text-slate-700 transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer"
               title="Experience 3D Virtual Envelope Opening"
             >
               <Mail className="w-3.5 h-3.5 text-slate-500" />
@@ -300,7 +290,7 @@ export default function App() {
             <button
               id="global-rsvp-modal-btn"
               onClick={() => setIsRSVPModalOpen(true)}
-              className="px-3.5 py-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm shadow-indigo-200 transition-all active:scale-95 flex items-center gap-1.5"
+              className="px-3.5 py-1.5 text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow-sm shadow-indigo-200 transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
             >
               <Check className="w-3.5 h-3.5 text-white" />
               <span className="hidden sm:inline">Submit RSVP</span>
@@ -329,25 +319,51 @@ export default function App() {
 
             {/* Right: Live Interactive Card Preview */}
             <div className="lg:col-span-7 order-1 lg:order-2 space-y-3">
-              {/* Preview Bar with Desktop / Mobile device frame toggles */}
-              <div className="flex items-center justify-between bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm text-xs font-medium">
+              {/* Preview Bar with Desktop / Mobile device frame toggles & Zoom scale */}
+              <div className="flex flex-wrap items-center justify-between gap-2 bg-white px-4 py-2.5 rounded-xl border border-slate-200 shadow-sm text-xs font-medium">
                 <div className="flex items-center gap-2 text-slate-700 font-semibold">
                   <Eye className="w-4 h-4 text-indigo-600" />
                   <span>Live Interactive Preview</span>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  {/* Zoom Controls */}
+                  <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-slate-600">
+                    <button
+                      onClick={handleZoomOut}
+                      className="p-1.5 rounded-md hover:bg-white hover:text-slate-900 transition-colors cursor-pointer"
+                      title="Zoom Out"
+                    >
+                      <ZoomOut className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={handleZoomReset}
+                      className="px-2 py-0.5 text-[11px] font-semibold hover:bg-white rounded-md transition-colors cursor-pointer"
+                      title="Reset Zoom to 100%"
+                    >
+                      {previewZoom}%
+                    </button>
+                    <button
+                      onClick={handleZoomIn}
+                      className="p-1.5 rounded-md hover:bg-white hover:text-slate-900 transition-colors cursor-pointer"
+                      title="Zoom In"
+                    >
+                      <ZoomIn className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Device toggle */}
                   <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200">
                     <button
                       onClick={() => setDeviceFrame('desktop')}
-                      className={`p-1.5 rounded-md transition-colors ${deviceFrame === 'desktop' ? 'bg-white text-slate-900 shadow-2xs font-semibold' : 'text-slate-400 hover:text-slate-600'}`}
+                      className={`p-1.5 rounded-md transition-colors cursor-pointer ${deviceFrame === 'desktop' ? 'bg-white text-slate-900 shadow-2xs font-semibold' : 'text-slate-400 hover:text-slate-600'}`}
                       title="Desktop View"
                     >
                       <Laptop className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => setDeviceFrame('mobile')}
-                      className={`p-1.5 rounded-md transition-colors ${deviceFrame === 'mobile' ? 'bg-white text-slate-900 shadow-2xs font-semibold' : 'text-slate-400 hover:text-slate-600'}`}
+                      className={`p-1.5 rounded-md transition-colors cursor-pointer ${deviceFrame === 'mobile' ? 'bg-white text-slate-900 shadow-2xs font-semibold' : 'text-slate-400 hover:text-slate-600'}`}
                       title="Mobile Phone View"
                     >
                       <Smartphone className="w-3.5 h-3.5" />
@@ -356,16 +372,22 @@ export default function App() {
 
                   <button
                     onClick={() => setIsEnvelopeOpen(true)}
-                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-medium hover:bg-slate-50 transition-colors"
+                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-medium hover:bg-slate-50 transition-colors cursor-pointer shadow-2xs"
                   >
-                    Open Envelope View
+                    Envelope View
                   </button>
                 </div>
               </div>
 
-              {/* Live Card Container framed */}
+              {/* Live Card Container framed with zoom scale */}
               <div className={`transition-all duration-300 mx-auto ${deviceFrame === 'mobile' ? 'max-w-md border-8 border-slate-900 rounded-[38px] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)] p-1 bg-slate-950' : 'w-full'}`}>
-                <div className="overflow-y-auto max-h-[82vh] rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.08)] border border-slate-200 bg-white">
+                <div 
+                  className="overflow-y-auto max-h-[82vh] rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.08)] border border-slate-200 bg-white transition-transform origin-top"
+                  style={{
+                    transform: previewZoom !== 100 ? `scale(${previewZoom / 100})` : undefined,
+                    transformOrigin: 'top center',
+                  }}
+                >
                   <CardInvitationView
                     event={activeEvent}
                     onOpenRSVP={() => setIsRSVPModalOpen(true)}
@@ -381,13 +403,69 @@ export default function App() {
 
         {/* VIEW 2: FULLSCREEN GUEST CARD VIEW */}
         {activeMode === 'guest-card' && (
-          <div className="w-full">
-            <CardInvitationView
-              event={activeEvent}
-              onOpenRSVP={() => setIsRSVPModalOpen(true)}
-              guestbookEntries={guestbookEntries}
-              onAddGuestbookEntry={handleAddGuestbookEntry}
-            />
+          <div className="w-full relative pb-16">
+            {/* Floating Top/Bottom control bar for returning to editor */}
+            <div className="sticky top-14 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200 py-2 px-4 shadow-sm flex items-center justify-between gap-3 max-w-5xl mx-auto rounded-b-2xl mb-4 no-print">
+              <button
+                onClick={() => setActiveMode('editor')}
+                className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Return to Studio Editor</span>
+              </button>
+
+              <div className="flex items-center gap-2">
+                {/* Zoom Controls in guest preview */}
+                <div className="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-slate-600">
+                  <button
+                    onClick={handleZoomOut}
+                    className="p-1 rounded-md hover:bg-white hover:text-slate-900 transition-colors cursor-pointer"
+                    title="Zoom Out"
+                  >
+                    <ZoomOut className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="px-2 text-[11px] font-semibold">{previewZoom}%</span>
+                  <button
+                    onClick={handleZoomIn}
+                    className="p-1 rounded-md hover:bg-white hover:text-slate-900 transition-colors cursor-pointer"
+                    title="Zoom In"
+                  >
+                    <ZoomIn className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setIsEnvelopeOpen(true)}
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Mail className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Virtual Envelope</span>
+                </button>
+
+                <button
+                  onClick={() => setIsRSVPModalOpen(true)}
+                  className="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-sm shadow-indigo-200 cursor-pointer"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>RSVP Now</span>
+                </button>
+              </div>
+            </div>
+
+            <div 
+              className="w-full transition-transform origin-top"
+              style={{
+                transform: previewZoom !== 100 ? `scale(${previewZoom / 100})` : undefined,
+                transformOrigin: 'top center',
+              }}
+            >
+              <CardInvitationView
+                event={activeEvent}
+                onOpenRSVP={() => setIsRSVPModalOpen(true)}
+                guestbookEntries={guestbookEntries}
+                onAddGuestbookEntry={handleAddGuestbookEntry}
+              />
+            </div>
           </div>
         )}
 
@@ -435,6 +513,7 @@ export default function App() {
         isOpen={isRSVPModalOpen}
         onClose={() => setIsRSVPModalOpen(false)}
         event={activeEvent}
+        onSuccess={handleRSVPSubmit}
         onRSVPSubmitted={handleRSVPSubmit}
       />
 

@@ -1,18 +1,23 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, Mail, Heart, Crown, Award, Music, Volume2, VolumeX, Eye } from 'lucide-react';
+import { Sparkles, Mail, Heart, Crown, Award, Music, Volume2, VolumeX, Eye, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { EventInvitation } from '../types';
 
 interface EnvelopeExperienceProps {
   event: EventInvitation;
-  onOpen: () => void;
   isOpen: boolean;
+  onClose: () => void;
+  onOpenCard?: () => void;
 }
 
-export const EnvelopeExperience: React.FC<EnvelopeExperienceProps> = ({ event, onOpen, isOpen }) => {
+export const EnvelopeExperience: React.FC<EnvelopeExperienceProps> = ({ 
+  event, 
+  isOpen, 
+  onClose, 
+  onOpenCard 
+}) => {
   const [isOpening, setIsOpening] = useState(false);
-  const [soundEnabled, setSoundEnabled] = useState(true);
 
   const getEnvelopeColorClass = (color: string) => {
     switch (color) {
@@ -65,19 +70,33 @@ export const EnvelopeExperience: React.FC<EnvelopeExperienceProps> = ({ event, o
       // ignore
     }
     setTimeout(() => {
-      onOpen();
+      if (onOpenCard) {
+        onOpenCard();
+      } else {
+        onClose();
+      }
       setIsOpening(false);
     }, 900);
   };
 
-  if (isOpen) {
+  if (!isOpen) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 z-40 bg-stone-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4 overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-stone-950/90 backdrop-blur-md flex flex-col items-center justify-center p-4 overflow-hidden">
       {/* Background ambient lighting */}
       <div className="absolute inset-0 pointer-events-none opacity-30 bg-[radial-gradient(circle_at_50%_40%,#c59b27_0%,transparent_60%)]" />
+
+      {/* Top Close Button */}
+      <button
+        id="close-envelope-modal-btn"
+        onClick={onClose}
+        className="absolute top-4 right-4 z-50 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all backdrop-blur-sm border border-white/10"
+        title="Close Envelope View"
+      >
+        <X className="w-5 h-5" />
+      </button>
 
       <div className="relative z-10 max-w-lg w-full text-center flex flex-col items-center">
         <motion.div
@@ -160,15 +179,24 @@ export const EnvelopeExperience: React.FC<EnvelopeExperienceProps> = ({ event, o
           </div>
         </motion.div>
 
-        {/* Direct Skip Button */}
-        <div className="mt-8 flex items-center gap-4">
+        {/* Action Buttons */}
+        <div className="mt-8 flex items-center gap-3">
           <button
             id="skip-envelope-btn"
-            onClick={onOpen}
+            onClick={() => {
+              if (onOpenCard) onOpenCard();
+              else onClose();
+            }}
             className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-medium backdrop-blur-sm border border-white/10 transition-all flex items-center gap-2"
           >
             <Eye className="w-3.5 h-3.5" />
             <span>Open Invitation Card Directly</span>
+          </button>
+          <button
+            onClick={onClose}
+            className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-stone-300 hover:text-white text-xs font-medium backdrop-blur-sm border border-white/5 transition-all"
+          >
+            Close
           </button>
         </div>
       </div>
