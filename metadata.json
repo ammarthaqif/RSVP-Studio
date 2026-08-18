@@ -1,0 +1,6 @@
+{
+  "name": "Celebration Studio - Digital Invitations & RSVP Tracker",
+  "description": "Design and share customizable digital wedding and event invitation cards with interactive venue maps, automated RSVP tracking, guestbook, PDF export, and AI wording assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
