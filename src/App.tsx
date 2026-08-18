@@ -17,10 +17,39 @@ import { EditorSidebar } from './components/EditorSidebar';
 type AppMode = 'editor' | 'guest-card' | 'rsvp-tracker' | 'share-export';
 
 export default function App() {
-  // Current Event state
-  const [events, setEvents] = useState<EventInvitation[]>(PRESET_TEMPLATES);
-  const [activeEventId, setActiveEventId] = useState<string>(PRESET_TEMPLATES[0].id);
+  // Current Event state with localStorage persistence
+  const [events, setEvents] = useState<EventInvitation[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('celebration_studio_events');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed;
+          }
+        }
+      } catch {
+        // Fallback to presets
+      }
+    }
+    return PRESET_TEMPLATES;
+  });
+
+  const [activeEventId, setActiveEventId] = useState<string>(() => {
+    return PRESET_TEMPLATES[0].id;
+  });
   const [activeMode, setActiveMode] = useState<AppMode>('editor');
+
+  // Persist events to localStorage on change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('celebration_studio_events', JSON.stringify(events));
+      } catch {
+        // storage quota exceeded or disabled
+      }
+    }
+  }, [events]);
 
   // Device preview simulation in editor mode
   const [deviceFrame, setDeviceFrame] = useState<'desktop' | 'mobile'>('desktop');

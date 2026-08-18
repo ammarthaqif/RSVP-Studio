@@ -138,12 +138,37 @@ export const EditorSidebar: React.FC<EditorSidebarProps> = ({ event, onChange })
         }),
       });
 
-      const data = await response.json();
-      if (data.suggestions && data.suggestions.length > 0) {
-        setAiSuggestions(data.suggestions);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.suggestions && data.suggestions.length > 0) {
+          setAiSuggestions(data.suggestions);
+          return;
+        }
       }
-    } catch (err) {
-      console.error(err);
+      throw new Error('Fallback to client templates');
+    } catch {
+      // High quality client-side fallback suggestions for static hosting environments (e.g. GitHub Pages)
+      const fallbackSuggestions = [
+        {
+          headline: aiTone.includes('Formal') ? 'Request the Honor of Your Presence' : 'Together with Joy & Celebration',
+          subtitle: `With joyful hearts, we warmly invite you to join us as we celebrate our love and shared future.`,
+          storyText: `From our very first encounter under the starry night to building a life filled with laughter, adventure, and unwavering companionship, our journey has been blessed by the warmth of cherished family and dear friends like you.`,
+          dressCode: aiTone.includes('Black Tie') ? 'Black Tie & Elegant Evening Attire' : 'Formal Cocktail & Celebration Attire',
+        },
+        {
+          headline: 'Two Lives, One Extraordinary Journey',
+          subtitle: `Your love, friendship, and guidance have meant the world to us. Please honor us with your presence on our special day.`,
+          storyText: `True love is finding your companion, best friend, and confidant all in one. We are so excited to celebrate the next chapter of our story with the people who matter most.`,
+          dressCode: 'Semi-Formal / Festive Garden Party Chic',
+        },
+        {
+          headline: 'A Celebration of Love, Friendship & Family',
+          subtitle: `Please join us for an unforgettable evening of vows, joyful toasts, dinner, and dancing under the stars.`,
+          storyText: `Every great story deserves a celebration. We cannot wait to raise a glass and make lifelong memories together with you.`,
+          dressCode: 'Smart Casual / Cocktail Attire',
+        }
+      ];
+      setAiSuggestions(fallbackSuggestions);
     } finally {
       setAiLoading(false);
     }

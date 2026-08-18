@@ -44,23 +44,34 @@ cd celebration-studio
 npm install
 ```
 
-### 3. Configure Environment Variables
+### 3. Configure Environment Variables (Optional)
 Copy the `.env.example` template:
 ```bash
 cp .env.example .env
 ```
 
-Add your optional [Gemini API Key](https://aistudio.google.com/) for AI wording generation:
+Add your optional [Gemini API Key](https://aistudio.google.com/) for live AI wording generation:
 ```env
 GEMINI_API_KEY="your_api_key_here"
 ```
-*(Note: If no API key is provided, the app continues to work with rich built-in template copy and sample itineraries).*
+*(Note: If no API key is provided or when hosted statically on GitHub Pages, the app runs with rich built-in template copy and curated itineraries seamlessly).*
 
 ### 4. Run Development Server
 ```bash
 npm run dev
 ```
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 🌐 1-Click GitHub Pages Deployment
+
+The repository includes a ready-to-use GitHub Actions workflow (`.github/workflows/deploy.yml`):
+
+1. In your GitHub repository, go to **Settings** > **Pages**.
+2. Under **Build and deployment** > **Source**, select **GitHub Actions**.
+3. Push your code or run the workflow manually from the **Actions** tab.
+4. Your site will be published at `https://<your-username>.github.io/<repo-name>/`.
 
 ---
 
